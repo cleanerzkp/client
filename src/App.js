@@ -50,18 +50,18 @@ console.log('Tracking order...', orderId);
 };
 
 return (
-<div className="App">
-<CargoHeader />
-{!connected ? (
-<ConnectWalletButton onConnected={handleWalletConnected} />
-) : (
-<Dashboard
-       onCreateOrder={createOrder}
-       onTrackOrder={trackOrder}
-       portNames={portNames}
-     />
-)}
-</div>
+  <div className={`App ${connected ? "connected" : "disconnected"}`}>
+    <CargoHeader />
+    {!connected ? (
+      <ConnectWalletButton onConnected={handleWalletConnected} />
+    ) : (
+      <Dashboard
+        onCreateOrder={createOrder}
+        onTrackOrder={trackOrder}
+        portNames={portNames}
+      />
+    )}
+  </div>
 );
 }
 
