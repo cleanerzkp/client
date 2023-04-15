@@ -1,30 +1,50 @@
 // utils/constants.js
 export const PORTS = [
-    "Port Knot City",
-    "Lake Knot City",
-    "South Knot City",
-    "Mountain Knot City"
+    {
+      name: "Port Knot City",
+      index: 0,
+    },
+    {
+      name: "Lake Knot City",
+      index: 1,
+    },
+    {
+      name: "South Knot City",
+      index: 2,
+    },
+    {
+      name: "Mountain Knot City",
+      index: 3,
+    },
   ];
+  
   export const DELIVERY_SIZES = {
     SMALL: {
-      name: 'Small',
-      value: 1,
-      reward: 10, // CRGO token reward
+      name: "Small",
+      weightLimit: 5,
+      rewardRate: 1, // CRGO token reward rate per km
     },
     MEDIUM: {
-      name: 'Medium',
-      value: 2,
-      reward: 20, // CRGO token reward
+      name: "Medium",
+      weightLimit: 20,
+      rewardRate: 3, // CRGO token reward rate per km
     },
     LARGE: {
-      name: 'Large',
-      value: 3,
-      reward: 30, // CRGO token reward
+      name: "Large",
+      weightLimit: 50,
+      rewardRate: 5, // CRGO token reward rate per km
     },
     EXTRA_LARGE: {
-      name: 'Extra Large',
-      value: 4,
-      reward: 40, // CRGO token reward
+      name: "Extra Large",
+      weightLimit: 100,
+      rewardRate: 8, // CRGO token reward rate per km
     },
   };
+  
+export const PORT_DISTANCES = [
+    [0, 15, 25, 35],
+    [15, 0, 10, 20],
+    [25, 10, 0, 15],
+    [35, 20, 15, 0],
+  ];
   
