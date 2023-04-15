@@ -1,63 +1,80 @@
-import React, { useState } from 'react';
-import { DELIVERY_SIZES, COURIERS, PORTS } from '../utils/constants';
+import React, { useState, useEffect } from 'react';
+import { COURIERS, PORT_DISTANCES, PORTS } from '../utils/constants';
+import { calculatePrice } from '../utils/helpers';
+import PackageSizeSelection from './PackageSizeSelection';
+import SelectPort from './SelectPort';
 
-function Dashboard(props) {
-  const [packageSize, setPackageSize] = useState(DELIVERY_SIZES.SMALL);
+function Dashboard({ onCreateOrder, onTrackOrder }) {
+  const [packageWeight, setPackageWeight] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [distance, setDistance] = useState(0);
   const [courier, setCourier] = useState('');
   const [startingPort, setStartingPort] = useState('');
   const [destinationPort, setDestinationPort] = useState('');
   const [orderId, setOrderId] = useState('');
 
-  const handlePackageSizeChange = (e) => {
-    setPackageSize(DELIVERY_SIZES[e.target.value]);
+  useEffect(() => {
+    setPrice(calculatePrice(packageWeight, distance));
+  }, [packageWeight, distance]);
+
+  const handlePackageWeightChange = (value) => {
+    setPackageWeight(value);
   };
 
-  const handleCourierChange = (e) => {
-    setCourier(e.target.value);
+  const handleCourierChange = (event) => {
+    setCourier(event.target.value);
   };
 
-  const handleStartingPortChange = (e) => {
-    setStartingPort(e.target.value);
+  const handleStartingPortChange = (event) => {
+    setStartingPort(event.target.value);
+    updateDistance(event.target.value, destinationPort);
   };
 
-  const handleDestinationPortChange = (e) => {
-    setDestinationPort(e.target.value);
+  const handleDestinationPortChange = (event) => {
+    setDestinationPort(event.target.value);
+    updateDistance(startingPort, event.target.value);
   };
 
-  const handleOrderIdChange = (e) => {
-    setOrderId(e.target.value);
+  const updateDistance = (start, end) => {
+    if (start && end) {
+      const newDistance = PORT_DISTANCES[start][end];
+      setDistance(newDistance);
+    } else {
+      setDistance(0);
+    }
   };
 
   const handleSubmitOrder = () => {
-    props.onCreateOrder(packageSize, courier, startingPort, destinationPort);
+    onCreateOrder(packageWeight, courier, startingPort, destinationPort);
+  };
+
+  const handleOrderIdChange = (event) => {
+    setOrderId(event.target.value);
   };
 
   const handleTrackOrder = () => {
-    props.onTrackOrder(orderId);
+    onTrackOrder(orderId);
   };
 
   return (
     <div className="Dashboard">
       <h2>Create Order</h2>
       <div className="form-group">
-        <label htmlFor="packageSize">Package Weight Category:</label>
-        <select
-          id="packageSize"
+        <label htmlFor="packageWeight">
+          Package Weight: {packageWeight} kg
+        </label>
+        <input
+          type="range"
+          id="packageWeight"
           className="form-control"
-          value={Object.keys(DELIVERY_SIZES).find(
-            (key) => DELIVERY_SIZES[key] === packageSize
-          )}
-          onChange={handlePackageSizeChange}
-        >
-          {Object.entries(DELIVERY_SIZES).map(([key, value]) => (
-            <option key={key} value={key}>
-              {value.name} (up to {value.weightLimit} kg, ${value.rewardRate} CRGO)
-            </option>
-          ))}
-        </select>
+          min="0"
+          max="100"
+          value={packageWeight}
+          onChange={(e) => handlePackageWeightChange(e.target.value)}
+        />
       </div>
       <div className="form-group">
-        <label htmlFor="courier">Select Courier:</label>
+        <label htmlFor="courier">Courier:</label>
         <select
           id="courier"
           className="form-control"
@@ -65,73 +82,54 @@ function Dashboard(props) {
           onChange={handleCourierChange}
         >
           <option value="">Select a courier</option>
-          {COURIERS.map((courier, index) => (
-            <option key={index} value={courier.address}>
-              {courier.name}
+          {COURIERS.map((c, index) => (
+            <option key={index} value={c.address}>
+              {c.name}
             </option>
           ))}
         </select>
       </div>
-      <div className="form-group">
-        <label htmlFor="startingPort">Starting Port:</label>
-        <select
-          id="startingPort"
-          className="form-control"
-          value={startingPort}
-          onChange={handleStartingPortChange}
-        >
-          <option value="">Select a port</option>
-          {PORTS.map((port, index) => (
-            <option key={index} value={index}>
-              {port.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="form-group">
-        <label htmlFor="destinationPort">Destination Port:</label>
-        <select
-          id="destinationPort"
-          className="form-control"
-          value={destinationPort}
-          onChange={handleDestinationPortChange}
-        >
-          <option value="">Select a port</option>
-          {PORTS.map((port, index) => (
-            <option key={index} value={index}>
-              {port.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button
-        className="btn btn-primary"
-        onClick={handleSubmitOrder}
-        disabled={!courier || !startingPort || !destinationPort}
-      >
-        Create Order
-      </button>
-      <hr />
-      <h2>Track Order</h2>
-      <div className="form-group">
-        <label htmlFor="orderId">Order ID:</label>
-        <input
-          type="text"
-          id="orderId"
-          className="form-control"
-          value={orderId}
-          onChange={handleOrderIdChange}
-        />
-      </div>
-      <button
-        className="btn btn-primary"
-        onClick={handleTrackOrder}
-        disabled={!orderId}
-      >
-        Track Order
-      </button>
-    </div>
-  );
+      <SelectPort
+        label="Starting Port:"
+        value={startingPort}
+        onChange={handleStartingPortChange}
+      />
+      <SelectPort
+        label="Destination Port:"
+        value={destinationPort}
+        onChange={handleDestinationPortChange}
+      />
+      <div>
+        <p>Distance: {distance} km</p>
+        <p>Price: {price.toFixed(2)}$CRGO</p>
+</div>
+<button
+className="btn btn-primary"
+onClick={handleSubmitOrder}
+disabled={!packageWeight || !courier || !startingPort || !destinationPort}
+>
+Create Order
+</button>
+<h2>Track Order</h2>
+<div className="form-group">
+<label htmlFor="orderId">Order ID:</label>
+<input
+       type="text"
+       id="orderId"
+       className="form-control"
+       value={orderId}
+       onChange={handleOrderIdChange}
+     />
+</div>
+<button
+     className="btn btn-secondary"
+     onClick={handleTrackOrder}
+     disabled={!orderId}
+   >
+Track Order
+</button>
+</div>
+);
 }
 
 export default Dashboard;
