@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { COURIERS, PORT_DISTANCES, PORTS } from '../utils/constants';
 import { calculatePrice } from '../utils/helpers';
-import PackageSizeSelection from './PackageSizeSelection';
 import SelectPort from './SelectPort';
 
 function Dashboard({ onCreateOrder, onTrackOrder }) {
@@ -12,6 +11,7 @@ function Dashboard({ onCreateOrder, onTrackOrder }) {
   const [startingPort, setStartingPort] = useState('');
   const [destinationPort, setDestinationPort] = useState('');
   const [orderId, setOrderId] = useState('');
+  const [orderStatus, setOrderStatus] = useState('');
 
   useEffect(() => {
     setPrice(calculatePrice(packageWeight, distance));
@@ -54,6 +54,14 @@ function Dashboard({ onCreateOrder, onTrackOrder }) {
 
   const handleTrackOrder = () => {
     onTrackOrder(orderId);
+    // Update the order status based on the orderId
+    setOrderStatus('Processing');
+  };
+
+  const handleCompleteOrder = () => {
+    // Implement NFT burning and CRGO token releasing logic
+    console.log('Completing order and burning NFT...');
+    setOrderStatus('Completed');
   };
 
   return (
@@ -100,34 +108,47 @@ function Dashboard({ onCreateOrder, onTrackOrder }) {
         onChange={handleDestinationPortChange}
       />
       <div>
-        <p>Distance: {distance} km</p>
-        <p>Price: {price.toFixed(2)}$CRGO</p>
-</div>
-<button
-className="btn btn-primary"
-onClick={handleSubmitOrder}
-disabled={!packageWeight || !courier || !startingPort || !destinationPort}
->
-Create Order
-</button>
-<h2>Track Order</h2>
-<div className="form-group">
-<label htmlFor="orderId">Order ID:</label>
-<input
-       type="text"
-       id="orderId"
-       className="form-control"
-       value={orderId}
-       onChange={handleOrderIdChange}
-     />
-</div>
-<button
-     className="btn btn-secondary"
-     onClick={handleTrackOrder}
-     disabled={!orderId}
-   >
-Track Order
-</button>
+      <p>Distance: {distance} km</p>
+    <p>Price: {price.toFixed(2)}$CRGO</p>
+  </div>
+  <button
+    className="btn btn-primary"
+    onClick={handleSubmitOrder}
+    disabled={!packageWeight || !courier || !startingPort || !destinationPort}
+  >
+    Create Order
+  </button>
+  <h2>Track Order</h2>
+  <div className="form-group">
+    <label htmlFor="orderId">Order ID:</label>
+    <input
+      type="text"
+      id="orderId"
+      className="form-control"
+      value={orderId}
+      onChange={handleOrderIdChange}
+    />
+  </div>
+  <button
+    className="btn btn-secondary"
+    onClick={handleTrackOrder}
+    disabled={!orderId}
+  >
+    Track Order
+  </button>
+  {orderStatus && (
+    <div>
+      <h3>Order Status: {orderStatus}</h3>
+      {orderStatus === 'Processing' && (
+        <button
+          className="btn btn-danger"
+          onClick={handleCompleteOrder}
+        >
+          Complete Order
+        </button>
+      )}
+    </div>
+  )}
 </div>
 );
 }
